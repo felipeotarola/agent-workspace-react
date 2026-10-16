@@ -86,6 +86,23 @@ test("panels animate into rails, preserve chat drafts and restore keyboard focus
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  const edge = page.getByRole("button", { name: "Växla sidmeny via kanten" });
+  await edge.dblclick();
+  await expect(
+    page.getByRole("button", { name: "Visa navigation", exact: true }),
+  ).toBeFocused();
+  await expect
+    .poll(() =>
+      page
+        .locator(".desktop-sidebar")
+        .evaluate((el) => Math.round(el.getBoundingClientRect().width)),
+    )
+    .toBe(64);
+  await edge.dblclick();
+  await expect(
+    page.getByRole("button", { name: "Dölj navigation", exact: true }),
+  ).toBeFocused();
+  await expect(chat).toHaveValue("Mitt oskickade utkast");
 });
 
 test("workspace rail shortcuts reopen selected view, including on narrow mobile", async ({

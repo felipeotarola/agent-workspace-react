@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  PanelLeft,
+  PanelLeftOpen,
+  PanelLeftClose,
   PanelRight,
   Menu,
   Moon,
   Sun,
-  X,
   PanelsTopLeft,
   LayoutGrid,
   Bot,
@@ -157,10 +157,11 @@ export default function App() {
             <button
               className="icon-button"
               aria-label="Dölj navigation"
+              title="Fäll ihop sidmenyn"
               aria-expanded={!collapsed}
               onClick={() => setCollapsed(true)}
             >
-              <X />
+              <PanelLeftClose />
             </button>
           </div>
           {sidebar}
@@ -186,7 +187,7 @@ export default function App() {
           <PanelRail
             label="Kompakt navigation"
             toggleLabel="Visa navigation"
-            icon={PanelLeft}
+            icon={PanelLeftOpen}
             onToggle={() => setCollapsed(false)}
             items={[
               { label: "Ny chatt", icon: CirclePlus, onClick: createChat },
@@ -227,6 +228,16 @@ export default function App() {
             }
           />
         </div>
+        <button
+          className="sidebar-edge"
+          aria-label="Växla sidmeny via kanten"
+          aria-expanded={!collapsed}
+          title="Dubbelklicka för att öppna eller stänga sidmenyn"
+          onDoubleClick={() => setCollapsed((value) => !value)}
+          onClick={(event) => {
+            if (event.detail === 0) setCollapsed((value) => !value);
+          }}
+        />
       </aside>
       <dialog
         ref={drawer}
@@ -244,7 +255,7 @@ export default function App() {
               aria-label="Stäng navigation"
               onClick={() => setMobileNav(false)}
             >
-              <X />
+              <PanelLeftClose />
             </button>
           </div>
           {sidebar}
