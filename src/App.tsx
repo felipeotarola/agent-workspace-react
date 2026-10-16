@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { Button } from "./components/ui/Button";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   PanelLeftOpen,
   PanelLeftClose,
@@ -12,6 +20,7 @@ import {
   Plug,
   House,
   CirclePlus,
+  SwatchBook,
 } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Chat } from "./components/Chat";
@@ -20,6 +29,7 @@ import { PanelRail } from "./components/PanelRail";
 import { FeaturePage } from "./components/FeaturePage";
 import { loadThreads, saveThreads, newThread, type Thread } from "./lib/chat";
 import "./App.css";
+const DesignSystem = lazy(() => import("./components/DesignSystem"));
 
 export default function App() {
   const [threads, setThreads] = useState<Thread[]>(loadThreads);
@@ -28,7 +38,11 @@ export default function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [pane, setPane] = useState("chat");
   const [workspaceOpen, setWorkspaceOpen] = useState(true);
-  const [view, setView] = useState("Översikt");
+  const [view, setView] = useState(() =>
+    new URLSearchParams(window.location.search).get("view") === "design-system"
+      ? "Designsystem"
+      : "Översikt",
+  );
   const [dark, setDark] = useState(() => {
     try {
       return (
@@ -47,7 +61,8 @@ export default function App() {
   const navigation = useRef<HTMLElement>(null);
   const previousCollapsed = useRef(collapsed);
   const active = threads.find((t) => t.id === activeId) ?? threads[0];
-  const standalone = view === "Agenten" || view === "Integrationer";
+  const standalone =
+    view === "Agenten" || view === "Integrationer" || view === "Designsystem";
 
   useEffect(() => {
     saveThreads(threads);
@@ -81,6 +96,7 @@ export default function App() {
   }, [collapsed]);
 
   function selectChat(id: string) {
+    window.history.replaceState(null, "", window.location.pathname);
     setActiveId(id);
     setView("Översikt");
     setPane("chat");
@@ -92,6 +108,13 @@ export default function App() {
     selectChat(thread.id);
   }
   function openView(next: string) {
+    window.history.replaceState(
+      null,
+      "",
+      next === "Designsystem"
+        ? `${window.location.pathname}?view=design-system`
+        : window.location.pathname,
+    );
     setView(next);
     setPane("workspace");
     setWorkspaceOpen(true);
@@ -114,26 +137,28 @@ export default function App() {
   const header = (
     <header className="topbar">
       <div className="topbar-title">
-        <button
+        <Button
+          shape="icon"
           className="icon-button mobile-only"
           aria-label="Öppna navigation"
           onClick={() => setMobileNav(true)}
         >
           <Menu />
-        </button>
+        </Button>
         <PanelsTopLeft size={18} />
         <span>{standalone ? view : active.title}</span>
       </div>
       <div className="topbar-actions">
         {!standalone && (
-          <button
+          <Button
+            shape="icon"
             className="icon-button"
             aria-label={workspaceOpen ? "Dölj workspace" : "Visa workspace"}
             aria-expanded={workspaceOpen}
             onClick={toggleWorkspace}
           >
             <PanelRight />
-          </button>
+          </Button>
         )}
       </div>
     </header>
@@ -153,7 +178,8 @@ export default function App() {
         >
           <div className="brand-row">
             <Brand />
-            <button
+            <Button
+              shape="icon"
               className="icon-button"
               aria-label="Dölj navigation"
               title="Fäll ihop sidmenyn"
@@ -161,10 +187,10 @@ export default function App() {
               onClick={() => setCollapsed(true)}
             >
               <PanelLeftClose />
-            </button>
+            </Button>
           </div>
           {sidebar}
-          <button
+          <Button
             className="account"
             onClick={() => setDark(!dark)}
             title="Byt färgtema"
@@ -176,7 +202,7 @@ export default function App() {
               <small>Personlig workspace</small>
             </span>
             {dark ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
+          </Button>
         </div>
         <div
           className="sidebar-rail"
@@ -214,16 +240,22 @@ export default function App() {
                 onClick: () => openView("Översikt"),
                 active: view === "Översikt",
               },
+              {
+                label: "Designsystem",
+                icon: SwatchBook,
+                onClick: () => openView("Designsystem"),
+                active: view === "Designsystem",
+              },
             ]}
             footer={
-              <button
+              <Button
                 className="rail-button"
                 aria-label="Byt färgtema"
                 title="Byt färgtema"
                 onClick={() => setDark(!dark)}
               >
                 {dark ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
+              </Button>
             }
           />
         </div>
@@ -249,25 +281,38 @@ export default function App() {
         <div className="drawer-content">
           <div className="brand-row">
             <Brand />
-            <button
+            <Button
+              shape="icon"
               className="icon-button"
               aria-label="Stäng navigation"
               onClick={() => setMobileNav(false)}
             >
               <PanelLeftClose />
-            </button>
+            </Button>
           </div>
           {sidebar}
-          <button className="nav-link" onClick={() => setDark(!dark)}>
+          <Button className="nav-link" onClick={() => setDark(!dark)}>
             {dark ? <Sun /> : <Moon />}Byt färgtema
-          </button>
+          </Button>
         </div>
       </dialog>
       <main className="main-shell">
         {standalone && (
           <>
             {header}
-            <FeaturePage view={view} dark={dark} />
+            {view === "Designsystem" ? (
+              <Suspense
+                fallback={
+                  <p className="page-loading" role="status">
+                    Laddar designsystem…
+                  </p>
+                }
+              >
+                <DesignSystem dark={dark} onThemeChange={setDark} />
+              </Suspense>
+            ) : (
+              <FeaturePage view={view} dark={dark} />
+            )}
           </>
         )}
         <div
@@ -286,13 +331,13 @@ export default function App() {
           <section className="chat-column" aria-label="Samtalsyta">
             {header}
             <div className="mobile-tabs" role="group" aria-label="Panel">
-              <button
+              <Button
                 aria-pressed={pane === "chat"}
                 onClick={() => setPane("chat")}
               >
                 Chatt
-              </button>
-              <button
+              </Button>
+              <Button
                 aria-pressed={pane === "workspace"}
                 onClick={() => {
                   setPane("workspace");
@@ -300,7 +345,7 @@ export default function App() {
                 }}
               >
                 Workspace
-              </button>
+              </Button>
             </div>
             <Chat
               key={active.id}

@@ -135,8 +135,10 @@ test("workspace rail shortcuts reopen selected view, including on narrow mobile"
   ).toBe(true);
   const rail = page.getByRole("navigation", { name: "Kompakt workspace" });
   await rail.getByRole("button", { name: "Översikt", exact: true }).click();
-  await expect(page.getByLabel("Översikt – tom arbetsyta")).toBeVisible();
-  await expect(page.locator(".workspace-canvas")).toBeEmpty();
+  await expect(page.getByLabel("Översikt – arbetsyta")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Välj filer till workspace" }),
+  ).toBeVisible();
 });
 
 test("reduced motion disables both panel width animations", async ({

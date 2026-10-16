@@ -1,8 +1,15 @@
-import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: { include: ['@xyflow/react'] },
-})
+  optimizeDeps: { include: ["@xyflow/react", "@radix-ui/react-select", "eve/react"] },
+  server: {
+    watch: { ignored: ["**/.eve/**", "**/.output/**"] },
+    proxy: {
+      "/eve": "http://127.0.0.1:2001",
+      "/api": "http://127.0.0.1:2001",
+      "/.well-known/workflow": "http://127.0.0.1:2001",
+    },
+  },
+});

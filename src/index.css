@@ -1,5 +1,7 @@
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/manrope";
 @import "./tokens.css";
+@import "./components/ui/design-system.css";
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
@@ -10,8 +12,8 @@
 }
 body {
   margin: 0;
-  font-family: "Inter Variable", Inter, sans-serif;
-  font-size: 14px;
+  font: var(--type-body);
+  font-optical-sizing: auto;
   color: var(--foreground);
   background: var(--background);
   -webkit-font-smoothing: antialiased;
@@ -41,6 +43,16 @@ button:disabled {
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 3px;
+}
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: break-word;
+}
+h1,
+h2 {
+  text-wrap: balance;
 }
 button:hover:not(:disabled) {
   background: var(--accent);

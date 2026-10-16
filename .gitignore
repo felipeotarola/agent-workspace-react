@@ -26,3 +26,9 @@ test-results
 *.njsproj
 *.sln
 *.sw?
+
+# Agent runtime, local state, generated host output
+.eve/
+.output/
+.vercel/
+!.env.example

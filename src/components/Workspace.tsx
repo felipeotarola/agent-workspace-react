@@ -1,6 +1,8 @@
+import { Button } from "./ui/Button";
 import { House, PanelRightOpen, type LucideIcon } from "lucide-react";
 import { PanelRail } from "./PanelRail";
 import { useEffect, useRef } from "react";
+import { WorkspaceFiles } from "./WorkspaceFiles";
 const tabs: [LucideIcon, string][] = [[House, "Översikt"]];
 export function Workspace({
   view,
@@ -42,7 +44,8 @@ export function Workspace({
           </div>
           <nav aria-label="Workspace-vyer">
             {tabs.map(([Icon, label]) => (
-              <button
+              <Button
+                size="sm"
                 key={label}
                 className={view === label ? "selected" : ""}
                 aria-current={view === label ? "page" : undefined}
@@ -50,14 +53,15 @@ export function Workspace({
               >
                 <Icon size={15} />
                 {label}
-              </button>
+              </Button>
             ))}
           </nav>
         </header>
-        <div
-          className="workspace-canvas"
-          aria-label={`${view} – tom arbetsyta`}
-        />
+        <div className="workspace-canvas" aria-label={`${view} – arbetsyta`}>
+          <div hidden={view !== "Översikt"}>
+            <WorkspaceFiles />
+          </div>
+        </div>
       </div>
       <div className="workspace-rail" inert={open} aria-hidden={open}>
         <PanelRail

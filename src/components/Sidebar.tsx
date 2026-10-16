@@ -1,3 +1,4 @@
+import { Button } from "./ui/Button";
 import { useState } from "react";
 import {
   LayoutGrid,
@@ -7,9 +8,11 @@ import {
   CirclePlus,
   Search,
   MessageSquare,
+  SwatchBook,
   type LucideIcon,
 } from "lucide-react";
 import type { Thread } from "../lib/chat";
+import { Select } from "./ui/Select";
 const globalLinks: [LucideIcon, string][] = [
   [LayoutGrid, "Alla workspaces"],
   [Bot, "Agenten"],
@@ -42,55 +45,63 @@ export function Sidebar({
       <section className="nav-group" aria-label="Globalt">
         <h2 className="nav-section-title">Globalt</h2>
         {globalLinks.map(([Icon, label]) => (
-          <button
+          <Button
             key={label}
             className={`nav-link ${view === label ? "active" : ""}`}
             onClick={() => onView(label)}
           >
             <Icon />
             {label}
-          </button>
+          </Button>
         ))}
       </section>
       <section className="nav-group" aria-label="Workspace">
         <h2 className="nav-section-title">Workspace</h2>
         <div className="workspace-select">
           <span className="workspace-avatar">A</span>
-          <select aria-label="Välj workspace">
-            <option>Min workspace</option>
-          </select>
+          <Select
+            aria-label="Välj workspace"
+            defaultValue="personal"
+            options={[
+              {
+                value: "personal",
+                label: "Min workspace",
+                description: "Din personliga arbetsyta",
+              },
+            ]}
+          />
         </div>
         {workspaceLinks.map(([Icon, label]) => (
-          <button
+          <Button
             key={label}
             className={`nav-link ${view === label ? "active" : ""}`}
             onClick={() => onView(label)}
           >
             <Icon />
             {label}
-          </button>
+          </Button>
         ))}
       </section>
       <section className="nav-group chat-list" aria-label="Chattar">
         <h2 className="nav-section-title">
           Chattar<span className="summary-count">{threads.length}</span>
         </h2>
-        <button className="nav-link" onClick={onNew}>
+        <Button className="nav-link" onClick={onNew}>
           <CirclePlus />
           Ny chatt
-        </button>
-        <button
+        </Button>
+        <Button
           className="nav-link"
           aria-expanded={searching}
           onClick={() => setSearching(!searching)}
         >
           <Search />
           Sök chattar
-        </button>
+        </Button>
         {searching && (
           <input
             autoFocus
-            className="search-input"
+            className="ui-field search-input"
             aria-label="Sök chattar"
             placeholder="Sök en chatt…"
             value={query}
@@ -99,7 +110,7 @@ export function Sidebar({
         )}
         <div className="thread-list">
           {filtered.map((t) => (
-            <button
+            <Button
               key={t.id}
               className={`nav-link thread ${activeId === t.id ? "active" : ""}`}
               aria-current={activeId === t.id ? "page" : undefined}
@@ -107,13 +118,23 @@ export function Sidebar({
             >
               <MessageSquare />
               <span>{t.title}</span>
-            </button>
+            </Button>
           ))}
           {query && !filtered.length && (
             <p className="no-results">Inga chattar hittades.</p>
           )}
         </div>
       </section>
+      <div className="sidebar-system">
+        <Button
+          className={`nav-link ${view === "Designsystem" ? "active" : ""}`}
+          onClick={() => onView("Designsystem")}
+        >
+          <SwatchBook />
+          Designsystem
+          <span className="sidebar-system-dot" />
+        </Button>
+      </div>
     </nav>
   );
 }

@@ -1,3 +1,5 @@
+import { Surface } from "./ui/Surface";
+import { StatusBadge } from "./ui/StatusBadge";
 import {
   Bot,
   Plug,
@@ -53,7 +55,7 @@ export function FeaturePage({ view, dark }: { view: string; dark: boolean }) {
           <AgentDiagram dark={dark} />
         </Suspense>
       ) : (
-        <section
+        <Surface
           className="feature-card"
           aria-label="Tillgängliga integrationer"
         >
@@ -71,11 +73,13 @@ export function FeaturePage({ view, dark }: { view: string; dark: boolean }) {
                   <h3>{name}</h3>
                   <p>{description}</p>
                 </div>
-                <span className="integration-status">Ej ansluten</span>
+                <StatusBadge className="integration-status">
+                  Ej ansluten
+                </StatusBadge>
               </div>
             ))}
           </div>
-        </section>
+        </Surface>
       )}
     </section>
   );
