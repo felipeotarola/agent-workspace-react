@@ -132,7 +132,7 @@ export function Chat({
                     <span className="agent-symbol">
                       <Sparkles size={14} />
                     </span>
-                    Agent Workspace<span className="muted">· Demo</span>
+                    Agent Workspace
                   </div>
                 )}
                 <div className="message-body">{message.content}</div>
@@ -242,7 +242,7 @@ export function Chat({
               />
               <span className="model-label">
                 <Sparkles size={14} />
-                Agent<span className="model-demo">Mock</span>
+                Agent
               </span>
               <select
                 aria-label="Svarsstil"

@@ -1,0 +1,83 @@
+.agent-flow-card {
+  max-width: 960px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.agent-flow-heading {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.agent-flow-heading h2 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 5px;
+}
+.agent-flow-heading p {
+  font-size: 12px;
+}
+.agent-diagram {
+  width: 100%;
+  height: 340px;
+}
+.agent-diagram .react-flow {
+  --xy-background-color: var(--secondary);
+  --xy-background-pattern-dots-color: var(--qaa-border-component);
+  --xy-node-color: var(--foreground);
+  --xy-node-background-color: var(--background);
+  --xy-node-border: 1px solid var(--qaa-border-component);
+  --xy-node-border-radius: 12px;
+  --xy-edge-stroke: var(--qaa-border-strong);
+  --xy-edge-stroke-width: 1.5;
+  --xy-handle-background-color: var(--qaa-border-strong);
+  --xy-handle-border-color: var(--background);
+  --xy-controls-button-background-color: var(--background);
+  --xy-controls-button-background-color-hover: var(--accent);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-attribution-background-color: var(--background);
+}
+.agent-diagram .react-flow__node {
+  width: 180px;
+  padding: 18px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  box-shadow: var(--shadow-card);
+}
+.agent-diagram .primary-flow-node {
+  border-color: var(--primary);
+  font-weight: 600;
+}
+.agent-diagram .react-flow__controls {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.agent-diagram .react-flow__controls-button {
+  width: 32px;
+  height: 32px;
+}
+.agent-diagram .react-flow__attribution {
+  border-radius: 5px;
+  font-size: 9px;
+}
+.agent-diagram .react-flow__attribution a {
+  color: var(--muted-foreground);
+}
+.agent-diagram-loading {
+  display: grid;
+  place-items: center;
+  height: 420px;
+  max-width: 960px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .agent-diagram {
+    height: 440px;
+  }
+  .agent-flow-heading {
+    padding: 18px;
+  }
+}

@@ -6,6 +6,8 @@ import {
   Layers,
   type LucideIcon,
 } from "lucide-react";
+import { lazy, Suspense } from "react";
+const AgentDiagram = lazy(() => import("./AgentDiagram"));
 const integrations: { name: string; description: string; icon: LucideIcon }[] =
   [
     {
@@ -24,7 +26,7 @@ const integrations: { name: string; description: string; icon: LucideIcon }[] =
       icon: Layers,
     },
   ];
-export function FeaturePage({ view }: { view: string }) {
+export function FeaturePage({ view, dark }: { view: string; dark: boolean }) {
   const isAgent = view === "Agenten";
   const Icon = isAgent ? Bot : Plug;
   return (
@@ -41,26 +43,15 @@ export function FeaturePage({ view }: { view: string }) {
         </p>
       </header>
       {isAgent ? (
-        <article className="feature-card">
-          <div className="feature-card-heading">
-            <span className="feature-page-icon">
-              <Bot size={22} />
-            </span>
-            <div>
-              <h2>Agent Workspace</h2>
-              <p>Din personliga assistent</p>
+        <Suspense
+          fallback={
+            <div className="agent-diagram-loading" role="status">
+              Laddar diagram…
             </div>
-            <span className="demo-badge">Demo</span>
-          </div>
-          <p>
-            Bolla idéer, strukturera en uppgift eller skissa på en plan i
-            chatten.
-          </p>
-          <div className="feature-meta">
-            <span>Simulerade svar</span>
-            <span>Lokal chatthistorik</span>
-          </div>
-        </article>
+          }
+        >
+          <AgentDiagram dark={dark} />
+        </Suspense>
       ) : (
         <section
           className="feature-card"

@@ -125,7 +125,6 @@ export default function App() {
         <span>{standalone ? view : active.title}</span>
       </div>
       <div className="topbar-actions">
-        <span className="demo-badge">Demo</span>
         {!standalone && (
           <button
             className="icon-button"
@@ -268,7 +267,7 @@ export default function App() {
         {standalone && (
           <>
             {header}
-            <FeaturePage view={view} />
+            <FeaturePage view={view} dark={dark} />
           </>
         )}
         <div

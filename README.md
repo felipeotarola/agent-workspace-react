@@ -18,7 +18,7 @@ Node 22.12+ required (Node 24 recommended).
 - Enter to send, Shift+Enter for a new line.
 - Conversations stored only in browser localStorage; clear site data to reset.
 - Attachment demo records names only; never reads or uploads files.
-- Empty workspace with only Overview. Agent and Integrations are separate full-width demo pages without a right panel.
+- Empty workspace with only Overview. Agent and Integrations are separate full-width pages without a right panel. Agent includes a small draggable, zoomable React Flow diagram; integrations remain a static preview.
 - Resizable split: drag the handle all the way to the rail to close, drag it out to reopen, arrow keys, Enter to toggle, double-click to reset. Workspace closes smoothly to a visible icon rail; shortcuts reopen the selected view. Chat drafts and split width survive panel changes.
 - Mobile navigation dialog, panel tabs, light/dark and reduced motion.
 

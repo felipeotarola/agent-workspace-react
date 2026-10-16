@@ -370,13 +370,6 @@
   align-items: center;
   gap: 12px;
 }
-.demo-badge {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px 6px;
-  font-size: 10px;
-  color: var(--muted-foreground);
-}
 .split-layout {
   display: flex;
   flex: 1;
@@ -439,9 +432,6 @@
   font-size: 15px;
   font-weight: 600;
   margin: 0 0 4px;
-}
-.feature-card-heading .demo-badge {
-  margin-left: auto;
 }
 .feature-meta {
   display: flex;
@@ -712,11 +702,6 @@
   align-items: center;
   gap: 5px;
   font-size: 11px;
-}
-.model-demo {
-  font-size: 9px;
-  color: var(--muted-foreground);
-  margin-left: 2px;
 }
 .reasoning-select {
   font-size: 11px;
@@ -1039,9 +1024,6 @@
   }
   .composer-area {
     padding: 8px 12px 12px;
-  }
-  .model-demo {
-    display: none;
   }
   .composer-tools {
     gap: 4px;
