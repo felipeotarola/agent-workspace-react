@@ -1,3 +1,4 @@
+import { Button } from "./ui/Button";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 export type RailItem = {
@@ -27,17 +28,19 @@ export function PanelRail({
       <span className="rail-brand" aria-hidden="true">
         A
       </span>
-      <button
+      <Button
+        shape="icon"
         className="rail-button rail-toggle"
         aria-label={toggleLabel}
         title={toggleLabel}
         onClick={onToggle}
       >
         <Icon size={18} />
-      </button>
+      </Button>
       <div className="rail-items">
         {items.map(({ label: name, icon: ItemIcon, onClick, active }) => (
-          <button
+          <Button
+            shape="icon"
             className={`rail-button ${active ? "active" : ""}`}
             key={name}
             title={name}
@@ -46,7 +49,7 @@ export function PanelRail({
             onClick={onClick}
           >
             <ItemIcon size={18} />
-          </button>
+          </Button>
         ))}
       </div>
       <div className="rail-footer">{footer}</div>

@@ -1,7 +1,5 @@
 .agent-flow-card {
   max-width: 960px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
   overflow: hidden;
 }
 .agent-flow-heading {
@@ -9,12 +7,11 @@
   border-bottom: 1px solid var(--border);
 }
 .agent-flow-heading h2 {
-  font-size: 14px;
-  font-weight: 500;
+  font: var(--type-heading);
   margin: 0 0 5px;
 }
 .agent-flow-heading p {
-  font-size: 12px;
+  font: var(--type-caption);
 }
 .agent-diagram {
   width: 100%;
@@ -24,14 +21,14 @@
   --xy-background-color: var(--secondary);
   --xy-background-pattern-dots-color: var(--qaa-border-component);
   --xy-node-color: var(--foreground);
-  --xy-node-background-color: var(--background);
+  --xy-node-background-color: var(--card);
   --xy-node-border: 1px solid var(--qaa-border-component);
-  --xy-node-border-radius: 12px;
+  --xy-node-border-radius: var(--radius-control);
   --xy-edge-stroke: var(--qaa-border-strong);
   --xy-edge-stroke-width: 1.5;
   --xy-handle-background-color: var(--qaa-border-strong);
   --xy-handle-border-color: var(--background);
-  --xy-controls-button-background-color: var(--background);
+  --xy-controls-button-background-color: var(--card);
   --xy-controls-button-background-color-hover: var(--accent);
   --xy-controls-button-color: var(--foreground);
   --xy-controls-button-border-color: var(--border);
@@ -40,8 +37,7 @@
 .agent-diagram .react-flow__node {
   width: 180px;
   padding: 18px 14px;
-  font-family: inherit;
-  font-size: 13px;
+  font: var(--type-label);
   box-shadow: var(--shadow-card);
 }
 .agent-diagram .primary-flow-node {

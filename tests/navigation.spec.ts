@@ -89,7 +89,7 @@ test("mobile workspace can reopen using its rail toggle; standalone pages hide p
   await page
     .getByRole("button", { name: "Öppna workspace", exact: true })
     .click();
-  await expect(page.getByLabel("Översikt – tom arbetsyta")).toBeVisible();
+  await expect(page.getByLabel("Översikt – arbetsyta")).toBeVisible();
   await page
     .getByRole("button", { name: "Öppna navigation", exact: true })
     .click();

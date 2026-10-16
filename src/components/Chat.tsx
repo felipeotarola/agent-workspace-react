@@ -1,3 +1,4 @@
+import { Button } from "./ui/Button";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowUp,
@@ -9,7 +10,13 @@ import {
   MessageSquare,
   X,
 } from "lucide-react";
-import { mockReply, type Thread, type Message } from "../lib/chat";
+import {
+  responseStyles,
+  type Thread,
+  type Message,
+} from "../lib/chat";
+import { Select } from "./ui/Select";
+import { useAgent } from "../lib/agent/useAgent";
 export function Chat({
   thread,
   onChange,
@@ -18,67 +25,31 @@ export function Chat({
   onChange: (thread: Thread) => void;
 }) {
   const [draft, setDraft] = useState("");
-  const [pending, setPending] = useState(false);
+  const agent = useAgent(thread, onChange);
+  const { pending } = agent;
   const [style, setStyle] = useState("Auto");
   const [attachments, setAttachments] = useState<string[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
   const [copyError, setCopyError] = useState("");
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const file = useRef<HTMLInputElement>(null);
   useEffect(
     () => () => {
-      if (timer.current) clearTimeout(timer.current);
       if (copyTimer.current) clearTimeout(copyTimer.current);
     },
     [],
   );
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: "end" });
-  }, [thread.messages, pending]);
+  }, [agent.messages, pending]);
   function send(text = draft) {
-    if (!text.trim() || pending) return;
-    const message: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content:
-        text.trim() +
-        (attachments.length
-          ? `\n\nBifogat (demo): ${attachments.join(", ")}`
-          : ""),
-    };
-    const updated = {
-      ...thread,
-      title: thread.messages.length ? thread.title : text.trim().slice(0, 42),
-      messages: [...thread.messages, message],
-    };
-    onChange(updated);
+    if (!text.trim() || pending || agent.blocked) return;
+    agent.send(text.trim() + (attachments.length ? `\n\nBifogade filnamn (innehållet är inte uppladdat): ${attachments.join(", ")}` : ""), style);
     setDraft("");
     setAttachments([]);
-    setPending(true);
     if (input.current) input.current.style.height = "auto";
-    timer.current = setTimeout(() => {
-      onChange({
-        ...updated,
-        messages: [
-          ...updated.messages,
-          {
-            id: crypto.randomUUID(),
-            role: "assistant",
-            content: mockReply(text, style),
-          },
-        ],
-      });
-      setPending(false);
-      timer.current = null;
-    }, 1000);
-  }
-  function stop() {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = null;
-    setPending(false);
   }
   async function copy(message: Message) {
     try {
@@ -100,7 +71,7 @@ export function Chat({
         aria-live="polite"
         aria-relevant="additions text"
       >
-        {thread.messages.length === 0 ? (
+        {agent.messages.length === 0 ? (
           <div className="chat-welcome">
             <div className="welcome-icon">
               <Sparkles size={24} />
@@ -109,19 +80,25 @@ export function Chat({
             <h1>Vad vill du göra idag?</h1>
             <p>Börja med en tanke. Vi tar det därifrån.</p>
             <div className="suggestions">
-              <button onClick={() => send("Hjälp mig strukturera en idé")}>
+              <Button
+                variant="secondary"
+                onClick={() => send("Hjälp mig strukturera en idé")}
+              >
                 <MessageSquare size={16} />
                 Bolla en idé<span>↗</span>
-              </button>
-              <button onClick={() => send("Hjälp mig göra en plan för dagen")}>
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => send("Hjälp mig göra en plan för dagen")}
+              >
                 <Sparkles size={16} />
                 Gör en plan<span>↗</span>
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
           <div className="message-list">
-            {thread.messages.map((message) => (
+            {agent.messages.map((message) => (
               <article
                 key={message.id}
                 className={`message ${message.role}`}
@@ -137,7 +114,8 @@ export function Chat({
                 )}
                 <div className="message-body">{message.content}</div>
                 {message.role === "assistant" && (
-                  <button
+                  <Button
+                    shape="icon"
                     className="icon-button copy-button"
                     aria-label={
                       copied === message.id ? "Kopierat" : "Kopiera svar"
@@ -149,7 +127,7 @@ export function Chat({
                     ) : (
                       <Copy size={14} />
                     )}
-                  </button>
+                  </Button>
                 )}
               </article>
             ))}
@@ -162,6 +140,10 @@ export function Chat({
             <span className="typing-dots">•••</span>
           </div>
         )}
+        {agent.activity.map((label, index) => (
+          <div className="thinking" role="status" key={`${label}-${index}`}><Sparkles size={14} />{label}</div>
+        ))}
+        {agent.error && <p className="agent-error" role="alert">{agent.error}</p>}
         <div ref={bottom} />
       </div>
       <div className="composer-area">
@@ -177,7 +159,7 @@ export function Chat({
               {attachments.map((name) => (
                 <span key={name}>
                   {name}
-                  <button
+                  <Button
                     type="button"
                     aria-label={`Ta bort ${name}`}
                     onClick={() =>
@@ -185,7 +167,7 @@ export function Chat({
                     }
                   >
                     <X size={12} />
-                  </button>
+                  </Button>
                 </span>
               ))}
             </div>
@@ -198,6 +180,7 @@ export function Chat({
             id="message"
             rows={2}
             placeholder="Skriv ditt meddelande här…"
+            disabled={agent.blocked}
             value={draft}
             onChange={(e) => {
               setDraft(e.target.value);
@@ -217,14 +200,15 @@ export function Chat({
           />
           <div className="composer-toolbar">
             <div className="composer-tools">
-              <button
+              <Button
                 type="button"
+                shape="icon"
                 className="icon-button"
                 aria-label="Bifoga fil (demo, endast filnamn)"
                 onClick={() => file.current?.click()}
               >
                 <Plus size={18} />
-              </button>
+              </Button>
               <input
                 ref={file}
                 type="file"
@@ -244,39 +228,41 @@ export function Chat({
                 <Sparkles size={14} />
                 Agent
               </span>
-              <select
+              <Select
                 aria-label="Svarsstil"
                 className="reasoning-select"
                 value={style}
-                onChange={(e) => setStyle(e.target.value)}
-              >
-                <option>Auto</option>
-                <option>Kortfattat</option>
-                <option>Utförligt</option>
-              </select>
+                onValueChange={setStyle}
+                options={responseStyles}
+              />
             </div>
             {pending ? (
-              <button
+              <Button
                 type="button"
+                shape="icon"
+                variant="primary"
                 className="send-button"
                 aria-label="Stoppa svar"
-                onClick={stop}
+                onClick={agent.stop}
               >
                 <Square size={13} fill="currentColor" />
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                shape="icon"
+                variant="primary"
+                type="submit"
                 className="send-button"
                 aria-label="Skicka meddelande"
-                disabled={!draft.trim()}
+                disabled={!draft.trim() || agent.blocked}
               >
                 <ArrowUp size={19} />
-              </button>
+              </Button>
             )}
           </div>
         </form>
         <p className="composer-note" role="status">
-          {copyError || "Simulerade svar · Sparas bara i din webbläsare"}
+          {copyError || agent.note}
         </p>
       </div>
     </section>

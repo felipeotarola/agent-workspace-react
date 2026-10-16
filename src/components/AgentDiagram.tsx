@@ -1,3 +1,4 @@
+import { Surface } from "./ui/Surface";
 import { useEffect, useMemo, useState } from "react";
 import {
   Background,
@@ -67,7 +68,7 @@ export default function AgentDiagram({ dark }: { dark: boolean }) {
   );
 
   return (
-    <section className="agent-flow-card" aria-label="Agentdiagram">
+    <Surface className="agent-flow-card" aria-label="Agentdiagram">
       <div className="agent-flow-heading">
         <h2>Agentflöde</h2>
         <p>Meddelande → Agent → Svar</p>
@@ -95,6 +96,6 @@ export default function AgentDiagram({ dark }: { dark: boolean }) {
           <Controls showInteractive={false} />
         </ReactFlow>
       </div>
-    </section>
+    </Surface>
   );
 }

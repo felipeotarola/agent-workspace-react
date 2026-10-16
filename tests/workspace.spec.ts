@@ -8,7 +8,9 @@ test("chat, persistence, search, themes and panel controls", async ({
   await expect(
     page.getByRole("heading", { name: "Vad vill du göra idag?" }),
   ).toBeVisible();
-  await expect(page.locator(".workspace-canvas")).toBeEmpty();
+  await expect(
+    page.getByRole("button", { name: "Välj filer till workspace" }),
+  ).toBeVisible();
   await page.screenshot({
     path: "test-results/desktop-light.png",
     fullPage: true,
@@ -110,12 +112,14 @@ test("mobile navigation focus, workspace, dark chat and overflow", async ({
   ).toBeFocused();
   await page.getByRole("button", { name: "Workspace", exact: true }).click();
   await expect(page.locator(".workspace-canvas")).toBeVisible();
-  await expect(page.locator(".workspace-canvas")).toBeEmpty();
+  await expect(
+    page.getByRole("button", { name: "Välj filer till workspace" }),
+  ).toBeVisible();
   await page
     .getByRole("navigation", { name: "Workspace-vyer" })
     .getByRole("button", { name: "Översikt" })
     .click();
-  await expect(page.getByLabel("Översikt – tom arbetsyta")).toBeVisible();
+  await expect(page.getByLabel("Översikt – arbetsyta")).toBeVisible();
   await page.getByRole("button", { name: "Chatt", exact: true }).click();
   await page.getByRole("textbox", { name: "Ditt meddelande" }).fill("Min plan");
   await page.getByRole("textbox", { name: "Ditt meddelande" }).press("Enter");
