@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  PanelLeftClose,
   PanelLeft,
   PanelRight,
   Menu,
@@ -8,10 +7,17 @@ import {
   Sun,
   X,
   PanelsTopLeft,
+  LayoutGrid,
+  Bot,
+  Plug,
+  House,
+  CirclePlus,
 } from "lucide-react";
 import { Sidebar } from "./components/Sidebar";
 import { Chat } from "./components/Chat";
 import { Workspace } from "./components/Workspace";
+import { PanelRail } from "./components/PanelRail";
+import { FeaturePage } from "./components/FeaturePage";
 import { loadThreads, saveThreads, newThread, type Thread } from "./lib/chat";
 import "./App.css";
 
@@ -25,36 +31,65 @@ export default function App() {
   const [view, setView] = useState("Översikt");
   const [dark, setDark] = useState(() => {
     try {
-      return localStorage.getItem("syna-theme") === "dark";
+      return (
+        (localStorage.getItem("agent-workspace-theme") ??
+          localStorage.getItem("syna-theme")) === "dark"
+      );
     } catch {
       return false;
     }
   });
   const [chatWidth, setChatWidth] = useState(48);
   const split = useRef<HTMLDivElement>(null);
+  const [dragWidth, setDragWidth] = useState<number | null>(null);
+  const latestDragWidth = useRef<number | null>(null);
   const drawer = useRef<HTMLDialogElement>(null);
+  const navigation = useRef<HTMLElement>(null);
+  const previousCollapsed = useRef(collapsed);
   const active = threads.find((t) => t.id === activeId) ?? threads[0];
+  const standalone = view === "Agenten" || view === "Integrationer";
+
   useEffect(() => {
     saveThreads(threads);
   }, [threads]);
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     try {
-      localStorage.setItem("syna-theme", dark ? "dark" : "light");
+      localStorage.setItem("agent-workspace-theme", dark ? "dark" : "light");
     } catch {
-      /* Storage may be disabled. */
+      /* Theme still works without storage. */
     }
   }, [dark]);
   useEffect(() => {
     if (mobileNav) drawer.current?.showModal();
     else drawer.current?.close();
   }, [mobileNav]);
+  useEffect(() => {
+    if (
+      previousCollapsed.current !== collapsed &&
+      navigation.current?.contains(document.activeElement)
+    ) {
+      navigation.current
+        .querySelector<HTMLButtonElement>(
+          collapsed
+            ? ".sidebar-rail .rail-toggle"
+            : ".sidebar-expanded .brand-row button",
+        )
+        ?.focus();
+    }
+    previousCollapsed.current = collapsed;
+  }, [collapsed]);
+
+  function selectChat(id: string) {
+    setActiveId(id);
+    setView("Översikt");
+    setPane("chat");
+    setMobileNav(false);
+  }
   function createChat() {
     const thread = newThread();
     setThreads((prev) => [thread, ...prev]);
-    setActiveId(thread.id);
-    setPane("chat");
-    setMobileNav(false);
+    selectChat(thread.id);
   }
   function openView(next: string) {
     setView(next);
@@ -62,51 +97,136 @@ export default function App() {
     setWorkspaceOpen(true);
     setMobileNav(false);
   }
+  function toggleWorkspace() {
+    setWorkspaceOpen(!workspaceOpen);
+    setPane(workspaceOpen ? "chat" : "workspace");
+  }
   const sidebar = (
     <Sidebar
       threads={threads}
       activeId={active.id}
       view={view}
-      onSelect={(id) => {
-        setActiveId(id);
-        setPane("chat");
-        setMobileNav(false);
-      }}
+      onSelect={selectChat}
       onNew={createChat}
       onView={openView}
     />
   );
-  return (
-    <div className={`app-shell ${collapsed ? "nav-collapsed" : ""}`}>
-      <aside className="desktop-sidebar" aria-label="Huvudnavigation">
-        <div className="brand-row">
-          {!collapsed && <Brand />}
+  const header = (
+    <header className="topbar">
+      <div className="topbar-title">
+        <button
+          className="icon-button mobile-only"
+          aria-label="Öppna navigation"
+          onClick={() => setMobileNav(true)}
+        >
+          <Menu />
+        </button>
+        <PanelsTopLeft size={18} />
+        <span>{standalone ? view : active.title}</span>
+      </div>
+      <div className="topbar-actions">
+        <span className="demo-badge">Demo</span>
+        {!standalone && (
           <button
             className="icon-button"
-            aria-label={collapsed ? "Visa navigation" : "Dölj navigation"}
-            onClick={() => setCollapsed(!collapsed)}
+            aria-label={workspaceOpen ? "Dölj workspace" : "Visa workspace"}
+            aria-expanded={workspaceOpen}
+            onClick={toggleWorkspace}
           >
-            {collapsed ? <PanelLeft /> : <PanelLeftClose />}
+            <PanelRight />
+          </button>
+        )}
+      </div>
+    </header>
+  );
+
+  return (
+    <div className={`app-shell ${collapsed ? "nav-collapsed" : ""}`}>
+      <aside
+        ref={navigation}
+        className="desktop-sidebar"
+        aria-label="Huvudnavigation"
+      >
+        <div
+          className="sidebar-expanded"
+          inert={collapsed}
+          aria-hidden={collapsed}
+        >
+          <div className="brand-row">
+            <Brand />
+            <button
+              className="icon-button"
+              aria-label="Dölj navigation"
+              aria-expanded={!collapsed}
+              onClick={() => setCollapsed(true)}
+            >
+              <X />
+            </button>
+          </div>
+          {sidebar}
+          <button
+            className="account"
+            onClick={() => setDark(!dark)}
+            title="Byt färgtema"
+            aria-label="Byt färgtema"
+          >
+            <span className="avatar">DU</span>
+            <span className="account-copy">
+              <strong>Ditt konto</strong>
+              <small>Personlig workspace</small>
+            </span>
+            {dark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
         </div>
-        {!collapsed && sidebar}
-        <button
-          className="account"
-          onClick={() => setDark(!dark)}
-          title="Byt färgtema"
-          aria-label="Byt färgtema"
+        <div
+          className="sidebar-rail"
+          inert={!collapsed}
+          aria-hidden={!collapsed}
         >
-          <span className="avatar">DU</span>
-          {!collapsed && (
-            <>
-              <span className="account-copy">
-                <strong>Ditt konto</strong>
-                <small>Personlig workspace</small>
-              </span>
-              {dark ? <Sun size={16} /> : <Moon size={16} />}
-            </>
-          )}
-        </button>
+          <PanelRail
+            label="Kompakt navigation"
+            toggleLabel="Visa navigation"
+            icon={PanelLeft}
+            onToggle={() => setCollapsed(false)}
+            items={[
+              { label: "Ny chatt", icon: CirclePlus, onClick: createChat },
+              {
+                label: "Alla workspaces",
+                icon: LayoutGrid,
+                onClick: () => openView("Alla workspaces"),
+                active: view === "Alla workspaces",
+              },
+              {
+                label: "Agenten",
+                icon: Bot,
+                onClick: () => openView("Agenten"),
+                active: view === "Agenten",
+              },
+              {
+                label: "Integrationer",
+                icon: Plug,
+                onClick: () => openView("Integrationer"),
+                active: view === "Integrationer",
+              },
+              {
+                label: "Översikt",
+                icon: House,
+                onClick: () => openView("Översikt"),
+                active: view === "Översikt",
+              },
+            ]}
+            footer={
+              <button
+                className="rail-button"
+                aria-label="Byt färgtema"
+                title="Byt färgtema"
+                onClick={() => setDark(!dark)}
+              >
+                {dark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            }
+          />
+        </div>
       </aside>
       <dialog
         ref={drawer}
@@ -134,111 +254,147 @@ export default function App() {
         </div>
       </dialog>
       <main className="main-shell">
-        <header className="topbar">
-          <div className="topbar-title">
-            <button
-              className="icon-button mobile-only"
-              aria-label="Öppna navigation"
-              onClick={() => setMobileNav(true)}
-            >
-              <Menu />
-            </button>
-            <PanelsTopLeft size={18} />
-            <span>{active.title}</span>
-          </div>
-          <div className="topbar-actions">
-            <span className="demo-badge">Demo</span>
-            <button
-              className="icon-button"
-              aria-label={workspaceOpen ? "Dölj workspace" : "Visa workspace"}
-              aria-pressed={workspaceOpen}
-              onClick={() => setWorkspaceOpen(!workspaceOpen)}
-            >
-              <PanelRight />
-            </button>
-          </div>
-        </header>
-        <div className="mobile-tabs" role="group" aria-label="Panel">
-          <button
-            aria-pressed={pane === "chat"}
-            onClick={() => setPane("chat")}
-          >
-            Chatt
-          </button>
-          <button
-            aria-pressed={pane === "workspace"}
-            onClick={() => {
-              setPane("workspace");
-              setWorkspaceOpen(true);
-            }}
-          >
-            Workspace
-          </button>
-        </div>
+        {standalone && (
+          <>
+            {header}
+            <FeaturePage view={view} />
+          </>
+        )}
         <div
+          hidden={standalone}
           className={`split-layout ${workspaceOpen ? "" : "workspace-hidden"} mobile-${pane}`}
           ref={split}
-          style={{ "--chat-width": `${chatWidth}%` } as React.CSSProperties}
+          style={
+            {
+              "--chat-width": `${chatWidth}%`,
+              ...(dragWidth !== null
+                ? { "--workspace-drag-width": `${dragWidth}px` }
+                : {}),
+            } as CSSProperties
+          }
         >
-          <Chat
-            key={active.id}
-            thread={active}
-            onChange={(updated) =>
-              setThreads((prev) =>
-                prev.map((t) => (t.id === updated.id ? updated : t)),
-              )
+          <section className="chat-column" aria-label="Samtalsyta">
+            {header}
+            <div className="mobile-tabs" role="group" aria-label="Panel">
+              <button
+                aria-pressed={pane === "chat"}
+                onClick={() => setPane("chat")}
+              >
+                Chatt
+              </button>
+              <button
+                aria-pressed={pane === "workspace"}
+                onClick={() => {
+                  setPane("workspace");
+                  setWorkspaceOpen(true);
+                }}
+              >
+                Workspace
+              </button>
+            </div>
+            <Chat
+              key={active.id}
+              thread={active}
+              onChange={(updated) =>
+                setThreads((prev) =>
+                  prev.map((t) => (t.id === updated.id ? updated : t)),
+                )
+              }
+            />
+          </section>
+          <div
+            className="divider"
+            role="separator"
+            aria-label="Ändra panelbredd"
+            aria-orientation="vertical"
+            aria-valuenow={workspaceOpen ? Math.round(chatWidth) : 100}
+            aria-valuemin={25}
+            aria-valuemax={100}
+            aria-valuetext={
+              workspaceOpen
+                ? `Chatt ${Math.round(chatWidth)} procent`
+                : "Workspace hopfälld"
             }
-          />
-          {workspaceOpen && (
-            <>
-              <div
-                className="divider"
-                role="separator"
-                aria-label="Ändra panelbredd"
-                aria-orientation="vertical"
-                aria-valuenow={chatWidth}
-                aria-valuemin={30}
-                aria-valuemax={70}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                    e.preventDefault();
-                    setChatWidth((w) =>
-                      Math.min(
-                        70,
-                        Math.max(30, w + (e.key === "ArrowRight" ? 2 : -2)),
-                      ),
-                    );
-                  }
-                }}
-                onDoubleClick={() => setChatWidth(48)}
-                onPointerDown={(e) =>
-                  e.currentTarget.setPointerCapture(e.pointerId)
+            title="Dra för att ändra bredd eller fälla ihop · Enter för att öppna/stänga · Dubbelklicka för att återställa"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (["Enter", " ", "Home", "End"].includes(e.key)) {
+                e.preventDefault();
+                if (e.key === "Home") {
+                  setWorkspaceOpen(false);
+                  setPane("chat");
+                } else if (e.key === "End") {
+                  setWorkspaceOpen(true);
+                  setChatWidth(48);
+                } else toggleWorkspace();
+              } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                e.preventDefault();
+                if (!workspaceOpen) {
+                  if (e.key === "ArrowLeft") setWorkspaceOpen(true);
+                  return;
                 }
-                onPointerMove={(e) => {
-                  if (
-                    !e.currentTarget.hasPointerCapture(e.pointerId) ||
-                    !split.current
-                  )
-                    return;
-                  const rect = split.current.getBoundingClientRect();
+                const next = chatWidth + (e.key === "ArrowRight" ? 2 : -2);
+                if (next >= 88) {
+                  setWorkspaceOpen(false);
+                  setPane("chat");
+                } else setChatWidth(Math.min(86, Math.max(25, next)));
+              }
+            }}
+            onDoubleClick={() => {
+              setChatWidth(48);
+              setWorkspaceOpen(true);
+            }}
+            onPointerDown={(e) => {
+              if (e.button !== 0) return;
+              e.preventDefault();
+              e.currentTarget.focus();
+              e.currentTarget.setPointerCapture(e.pointerId);
+              latestDragWidth.current = null;
+              split.current?.classList.add("is-resizing");
+            }}
+            onPointerMove={(e) => {
+              if (
+                !e.currentTarget.hasPointerCapture(e.pointerId) ||
+                !split.current
+              )
+                return;
+              const rect = split.current.getBoundingClientRect();
+              const width = Math.min(
+                rect.width * 0.75,
+                Math.max(64, rect.right - e.clientX),
+              );
+              latestDragWidth.current = width;
+              setDragWidth(width);
+              if (width > 132) setWorkspaceOpen(true);
+            }}
+            onPointerUp={(e) =>
+              e.currentTarget.releasePointerCapture(e.pointerId)
+            }
+            onLostPointerCapture={() => {
+              const width = latestDragWidth.current;
+              if (width !== null && split.current) {
+                const fullWidth = split.current.getBoundingClientRect().width;
+                const close = width <= 132;
+                setWorkspaceOpen(!close);
+                setPane(close ? "chat" : "workspace");
+                if (!close)
                   setChatWidth(
-                    Math.min(
-                      70,
-                      Math.max(
-                        30,
-                        ((e.clientX - rect.left) / rect.width) * 100,
-                      ),
-                    ),
+                    100 - ((Math.max(300, width) + 1) / fullWidth) * 100,
                   );
-                }}
-                onPointerUp={(e) =>
-                  e.currentTarget.releasePointerCapture(e.pointerId)
-                }
-              />
-              <Workspace view={view} onView={openView} />
-            </>
-          )}
+              }
+              latestDragWidth.current = null;
+              split.current?.classList.remove("is-resizing");
+              setDragWidth(null);
+            }}
+          >
+            <span className="resize-grip" aria-hidden="true" />
+          </div>
+          <Workspace
+            view={view}
+            onView={openView}
+            open={workspaceOpen}
+            onToggle={toggleWorkspace}
+          />
         </div>
       </main>
     </div>
@@ -247,25 +403,12 @@ export default function App() {
 function Brand() {
   return (
     <div className="brand">
-      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-        <path
-          d="M23 12H12V23M41 12H52V23M12 41V52H23M52 41V52H41"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M18 32Q32 17 46 32Q32 47 18 32Z"
-          stroke="currentColor"
-          strokeWidth="3.5"
-          strokeLinejoin="round"
-        />
-        <circle cx="32" cy="32" r="4.5" fill="currentColor" />
-      </svg>
+      <span className="brand-monogram" aria-hidden="true">
+        A
+      </span>
       <span>
-        <strong>Syna</strong>
-        <small>Agenter & testning</small>
+        <strong>Agent Workspace</strong>
+        <small>Din personliga arbetsyta</small>
       </span>
     </div>
   );

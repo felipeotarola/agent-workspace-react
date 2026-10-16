@@ -5,6 +5,9 @@
   scrollbar-width: thin;
   scrollbar-color: var(--qaa-border-component) transparent;
 }
+[hidden] {
+  display: none !important;
+}
 body {
   margin: 0;
   font-family: "Inter Variable", Inter, sans-serif;

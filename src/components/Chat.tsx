@@ -125,14 +125,14 @@ export function Chat({
               <article
                 key={message.id}
                 className={`message ${message.role}`}
-                aria-label={message.role === "user" ? "Du" : "Syna"}
+                aria-label={message.role === "user" ? "Du" : "Agent Workspace"}
               >
                 {message.role === "assistant" && (
                   <div className="assistant-label">
                     <span className="agent-symbol">
                       <Sparkles size={14} />
                     </span>
-                    Syna<span className="muted">· Demo</span>
+                    Agent Workspace<span className="muted">· Demo</span>
                   </div>
                 )}
                 <div className="message-body">{message.content}</div>
@@ -158,7 +158,7 @@ export function Chat({
         {pending && (
           <div className="thinking" role="status">
             <Sparkles size={16} />
-            <span>Syna skriver</span>
+            <span>Agent Workspace skriver</span>
             <span className="typing-dots">•••</span>
           </div>
         )}
@@ -242,7 +242,7 @@ export function Chat({
               />
               <span className="model-label">
                 <Sparkles size={14} />
-                Syna<span className="model-demo">Mock</span>
+                Agent<span className="model-demo">Mock</span>
               </span>
               <select
                 aria-label="Svarsstil"

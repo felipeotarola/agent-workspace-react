@@ -13,18 +13,22 @@ test("chat, persistence, search, themes and panel controls", async ({
     path: "test-results/desktop-light.png",
     fullPage: true,
   });
-  await page.getByRole("textbox", { name: "Ditt meddelande" }).fill("Hej Syna");
+  await page
+    .getByRole("textbox", { name: "Ditt meddelande" })
+    .fill("Hej Agent Workspace");
   await page.getByRole("button", { name: "Skicka meddelande" }).click();
-  await expect(page.getByText("Syna skriver", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("article", { name: "Syna", exact: true }),
+    page.getByText("Agent Workspace skriver", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("article", { name: "Agent Workspace", exact: true }),
   ).toContainText("Hej!");
   await page.reload();
   await expect(
     page.getByRole("article", { name: "Du", exact: true }),
-  ).toContainText("Hej Syna");
+  ).toContainText("Hej Agent Workspace");
   await expect(
-    page.getByRole("article", { name: "Syna", exact: true }),
+    page.getByRole("article", { name: "Agent Workspace", exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Byt färgtema", exact: true })
@@ -45,17 +49,19 @@ test("chat, persistence, search, themes and panel controls", async ({
   await page.getByRole("button", { name: "Skicka meddelande" }).click();
   await page.getByRole("button", { name: "Stoppa svar" }).click();
   await expect(
-    page.getByRole("article", { name: "Syna", exact: true }),
+    page.getByRole("article", { name: "Agent Workspace", exact: true }),
   ).toHaveCount(0);
   await page
     .getByRole("button", { name: "Sök chattar", exact: true })
     .first()
     .click();
-  await page.getByRole("textbox", { name: "Sök chattar" }).fill("Hej Syna");
+  await page
+    .getByRole("textbox", { name: "Sök chattar" })
+    .fill("Hej Agent Workspace");
   await expect(page.locator(".desktop-sidebar .thread")).toHaveCount(1);
   await page.locator(".desktop-sidebar .thread").click();
   await expect(
-    page.getByRole("article", { name: "Syna", exact: true }),
+    page.getByRole("article", { name: "Agent Workspace", exact: true }),
   ).toBeVisible();
   const separator = page.getByRole("separator");
   await separator.focus();
@@ -64,7 +70,10 @@ test("chat, persistence, search, themes and panel controls", async ({
   await page
     .getByRole("button", { name: "Dölj workspace", exact: true })
     .click();
-  await expect(page.locator(".workspace-pane")).toHaveCount(0);
+  await expect(page.locator(".workspace-pane")).toHaveClass(/is-collapsed/);
+  await expect(
+    page.getByRole("navigation", { name: "Kompakt workspace", exact: true }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Visa workspace", exact: true })
     .click();
@@ -104,14 +113,14 @@ test("mobile navigation focus, workspace, dark chat and overflow", async ({
   await expect(page.locator(".workspace-canvas")).toBeEmpty();
   await page
     .getByRole("navigation", { name: "Workspace-vyer" })
-    .getByRole("button", { name: "Material" })
+    .getByRole("button", { name: "Översikt" })
     .click();
-  await expect(page.getByLabel("Material – tom arbetsyta")).toBeVisible();
+  await expect(page.getByLabel("Översikt – tom arbetsyta")).toBeVisible();
   await page.getByRole("button", { name: "Chatt", exact: true }).click();
   await page.getByRole("textbox", { name: "Ditt meddelande" }).fill("Min plan");
   await page.getByRole("textbox", { name: "Ditt meddelande" }).press("Enter");
   await expect(
-    page.getByRole("article", { name: "Syna", exact: true }),
+    page.getByRole("article", { name: "Agent Workspace", exact: true }),
   ).toContainText("steg för steg");
   await page.screenshot({
     path: "test-results/mobile-dark.png",

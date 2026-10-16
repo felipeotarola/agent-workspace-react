@@ -4,27 +4,18 @@ import {
   Bot,
   Plug,
   House,
-  ListChecks,
-  FolderOpen,
-  KeyRound,
   CirclePlus,
   Search,
   MessageSquare,
-  ChevronDown,
   type LucideIcon,
 } from "lucide-react";
 import type { Thread } from "../lib/chat";
 const globalLinks: [LucideIcon, string][] = [
   [LayoutGrid, "Alla workspaces"],
-  [Bot, "Agenter"],
+  [Bot, "Agenten"],
   [Plug, "Integrationer"],
 ];
-const workspaceLinks: [LucideIcon, string][] = [
-  [House, "Översikt"],
-  [ListChecks, "Testning"],
-  [FolderOpen, "Material"],
-  [KeyRound, "Vault"],
-];
+const workspaceLinks: [LucideIcon, string][] = [[House, "Översikt"]];
 type Props = {
   threads: Thread[];
   activeId: string;
@@ -48,11 +39,8 @@ export function Sidebar({
   );
   return (
     <nav className="sidebar-nav">
-      <details open className="nav-group">
-        <summary>
-          Globalt
-          <ChevronDown />
-        </summary>
+      <section className="nav-group" aria-label="Globalt">
+        <h2 className="nav-section-title">Globalt</h2>
         {globalLinks.map(([Icon, label]) => (
           <button
             key={label}
@@ -63,14 +51,11 @@ export function Sidebar({
             {label}
           </button>
         ))}
-      </details>
-      <details open className="nav-group">
-        <summary>
-          Workspace
-          <ChevronDown />
-        </summary>
+      </section>
+      <section className="nav-group" aria-label="Workspace">
+        <h2 className="nav-section-title">Workspace</h2>
         <div className="workspace-select">
-          <span className="workspace-avatar">S</span>
+          <span className="workspace-avatar">A</span>
           <select aria-label="Välj workspace">
             <option>Min workspace</option>
           </select>
@@ -85,12 +70,11 @@ export function Sidebar({
             {label}
           </button>
         ))}
-      </details>
-      <details open className="nav-group chat-list">
-        <summary>
+      </section>
+      <section className="nav-group chat-list" aria-label="Chattar">
+        <h2 className="nav-section-title">
           Chattar<span className="summary-count">{threads.length}</span>
-          <ChevronDown />
-        </summary>
+        </h2>
         <button className="nav-link" onClick={onNew}>
           <CirclePlus />
           Ny chatt
@@ -129,7 +113,7 @@ export function Sidebar({
             <p className="no-results">Inga chattar hittades.</p>
           )}
         </div>
-      </details>
+      </section>
     </nav>
   );
 }
